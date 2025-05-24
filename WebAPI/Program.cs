@@ -9,6 +9,7 @@ using Microsoft.OpenApi.Models;
 using Service;
 using WebAPI;
 using System.Reflection;
+using WebAPI.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -78,6 +79,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.ApplyMigrations();
 
