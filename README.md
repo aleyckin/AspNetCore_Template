@@ -5,16 +5,7 @@ API для управления пользователями и автомоби
 ## Основные технологии
 
 - ASP.NET Core 8.0
-- Entity Framework Core 9.0 (PostgreSQL или другая СУБД)
+- Entity Framework Core 9.0 (PostgreSQL)
 - AutoMapper
 - JWT аутентификация и авторизация
 - Swagger/OpenAPI для документации API
-
----
-
-## Запуск проекта
-
-### Требования
-
-- .NET 8.0 SDK
-- СУБД PostgreSQL
