@@ -8,12 +8,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 
 namespace Service
 {
     public static class ServiceDependency
     {
-        public static IServiceCollection AddServiceDependencies(this IServiceCollection services)
+        public static IServiceCollection AddServiceDependencies(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ICarService, CarService>();
@@ -21,6 +22,11 @@ namespace Service
 
             services.AddAutoMapper(typeof(UserMapperProfile));
 
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = configuration.GetConnectionString("Redis");
+            });
+            
             return services;
         }
     }

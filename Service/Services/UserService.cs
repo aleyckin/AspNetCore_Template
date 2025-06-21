@@ -9,7 +9,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Distributed;
 using static Domain.Exceptions.AppException;
 
 namespace Service.Services
@@ -19,12 +21,16 @@ namespace Service.Services
         private readonly DataContext _dataContext;
         private readonly IMapper _mapper;
         private readonly IJwtGenerator _jwtGenerator;
+        private readonly IDistributedCache _cache;
 
-        public UserService(DataContext dataContext, IMapper mapper, IJwtGenerator jwtGenerator)
+        public UserService(
+            DataContext dataContext, IMapper mapper, 
+            IJwtGenerator jwtGenerator, IDistributedCache cache)
         {
             _dataContext = dataContext;
             _mapper = mapper;
             _jwtGenerator = jwtGenerator;
+            _cache = cache;
         }
 
         public async Task DeleteUserByEmailAsync(string email)
@@ -44,7 +50,28 @@ namespace Service.Services
 
         public async Task<UserDto> GetUserByEmailAsync(string email)
         {
-            var user = await GetUserEntityByEmailAsync(email);
+            User? user = null;
+            string userString = await _cache.GetStringAsync(email);
+            if (userString != null)
+            {
+                user = JsonSerializer.Deserialize<User>(userString);
+            }
+            
+            if (user == null)
+            {
+                user = await GetUserEntityByEmailAsync(email);
+                Console.WriteLine($"{user.Email} извлечён из базы данных.");
+                userString = JsonSerializer.Serialize(user);
+                await _cache.SetStringAsync(email, userString,
+                    new DistributedCacheEntryOptions
+                    {
+                        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2)
+                    });
+            }
+            else
+            {
+                Console.WriteLine($"{user.Email} извлечён из кэша.");
+            }
 
             return _mapper.Map<UserDto>(user);
         }

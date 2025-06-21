@@ -35,7 +35,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-builder.Services.AddServiceDependencies();
+builder.Services.AddServiceDependencies(builder.Configuration);
 
 builder.Services.AddDbContext<DataContext>(options =>
 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
